@@ -335,11 +335,17 @@ eventsOutputPath = workingDir + "/delta/events"
 # TODO
 singleProductCsvFilePath = "/mnt/training/ecommerce/products/products.csv/part-00000-tid-1663954264736839188-daf30e86-5967-4173-b9ae-d1481d3506db-2367-1-c000.csv"
 
-print(FILL_IN)
+print(dbutils.fs.head(singleProductCsvFilePath))
 
 productsCsvPath = "/mnt/training/ecommerce/products/products.csv"
 
-productsDF = FILL_IN
+# productsDF = spark.read \
+#                   .csv(productsCsvPath, inferSchema=True, header=True)
+
+productsDF = spark.read \
+                  .option("inferSchema", True)  \
+                  .option("header", True) \
+                  .csv(productsCsvPath)
 
 productsDF.printSchema()
 
@@ -358,10 +364,15 @@ assert(productsDF.count() == 12)
 
 # COMMAND ----------
 
-# TODO
-userDefinedSchema = FILL_IN
+# from pyspark.sql.Types import StructType,StructField,StringType, DoubleType
+userDefinedSchema = StructType([
+  StructField("item_id", StringType(), True),
+  StructField("name", StringType(), True),
+  StructField("price", DoubleType(), True)
+])
 
-productsDF2 = FILL_IN
+productsDF2 = spark.read  \
+                   .csv(productsCsvPath, header=True, schema=userDefinedSchema)
 
 # COMMAND ----------
 
@@ -376,8 +387,9 @@ assert(userDefinedSchema.fieldNames() == ["item_id", "name", "price"])
 from pyspark.sql import Row
 
 expected1 = Row(item_id="M_STAN_Q", name="Standard Queen Mattress", price=1045.0)
+print(expected1)
 result1 = productsDF2.first()
-
+print(result1)
 assert(expected1 == result1)
 
 # COMMAND ----------
@@ -387,9 +399,11 @@ assert(expected1 == result1)
 # COMMAND ----------
 
 # TODO
-DDLSchema = FILL_IN
+DDLSchema = "`item_id` STRING, `name` STRING, `price` DOUBLE"
 
-productsDF3 = FILL_IN
+productsDF3 = spark.read  \
+                   .schema(DDLSchema)  \
+                   .csv(productsCsvPath, header=True)
 
 # COMMAND ----------
 
@@ -408,7 +422,10 @@ assert(productsDF3.count() == 12)
 
 # TODO
 productsOutputPath = workingDir + "/delta/products"
-productsDF.FILL_IN
+productsDF.write  \
+          .format("delta")  \
+          .mode("overwrite")  \
+          .save(productsOutputPath)
 
 # COMMAND ----------
 

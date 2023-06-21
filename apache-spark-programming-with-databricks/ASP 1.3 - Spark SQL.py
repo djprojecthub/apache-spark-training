@@ -255,6 +255,10 @@ budgetDF.collect()
 
 # COMMAND ----------
 
+budgetDF.collect()[1].name
+
+# COMMAND ----------
+
 # MAGIC %md ## Convert between DataFrames and SQL
 
 # COMMAND ----------
@@ -296,7 +300,7 @@ display(spark.sql("SELECT * FROM budget"))
 # COMMAND ----------
 
 # TODO
-eventsDF = FILL_IN
+eventsDF = spark.table("events")
 
 # COMMAND ----------
 
@@ -305,7 +309,11 @@ eventsDF = FILL_IN
 
 # COMMAND ----------
 
-# TODO
+display(eventsDF)
+
+# COMMAND ----------
+
+eventsDF.printSchema()
 
 # COMMAND ----------
 
@@ -319,8 +327,10 @@ eventsDF = FILL_IN
 
 # TODO
 macDF = (eventsDF
-         .FILL_IN
+         .where("device = 'macOS'")
+         .orderBy("event_timestamp")
 )
+display(macDF)
 
 # COMMAND ----------
 
@@ -329,9 +339,10 @@ macDF = (eventsDF
 
 # COMMAND ----------
 
-# TODO
-numRows = macDF.FILL_IN
-rows = macDF.FILL_IN
+numRows = macDF.count()
+rows = macDF.take(5)
+
+print("numRows: ",numRows,", ","rows: ",rows)
 
 # COMMAND ----------
 
@@ -354,7 +365,7 @@ assert(type(rows[0]) == Row)
 # COMMAND ----------
 
 # TODO
-macSQLDF = spark.FILL_IN
+macSQLDF = spark.sql("select * from events where device='macOS' order by event_timestamp")
 
 display(macSQLDF)
 
