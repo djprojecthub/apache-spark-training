@@ -30,6 +30,10 @@
 
 # COMMAND ----------
 
+print(eventsPath)
+
+# COMMAND ----------
+
 eventsDF = spark.read.parquet(eventsPath)
 display(eventsDF)
 
@@ -78,9 +82,9 @@ col("device")
 
 # COMMAND ----------
 
-col("ecommerce.purchase_revenue_in_usd") + col("ecommerce.total_item_quantity")
-col("event_timestamp").desc()
-(col("ecommerce.purchase_revenue_in_usd") * 100).cast("int")
+# col("ecommerce.purchase_revenue_in_usd") + col("ecommerce.total_item_quantity")
+# col("event_timestamp").desc()
+# (col("ecommerce.purchase_revenue_in_usd") * 100).cast("int")
 
 # COMMAND ----------
 
@@ -125,7 +129,7 @@ display(revDF)
 
 # COMMAND ----------
 
-devicesDF = eventsDF.select("user_id", "device")
+devicesDF = eventsDF.select("user_id", "device").distinct().orderBy("device")
 display(devicesDF)
 
 # COMMAND ----------
@@ -208,7 +212,8 @@ display(locationDF)
 
 # COMMAND ----------
 
-purchasesDF = eventsDF.filter("ecommerce.total_item_quantity > 0")
+#purchasesDF = eventsDF.filter("ecommerce.total_item_quantity > 0")
+purchasesDF = eventsDF.filter(col("ecommerce.total_item_quantity") > 0)
 display(purchasesDF)
 
 # COMMAND ----------
@@ -309,7 +314,7 @@ display(eventsDF)
 # COMMAND ----------
 
 # TODO
-revenueDF = eventsDF.FILL_IN
+revenueDF = eventsDF.withColumn("revenue",col("ecommerce.purchase_revenue_in_usd"))
 display(revenueDF)
 
 # COMMAND ----------
@@ -331,7 +336,7 @@ assert(expected1 == result1)
 # COMMAND ----------
 
 # TODO
-purchasesDF = revenueDF.FILL_IN
+purchasesDF = revenueDF.filter(col("revenue").isNotNull())
 display(purchasesDF)
 
 # COMMAND ----------
@@ -353,8 +358,9 @@ assert purchasesDF.filter(col("revenue").isNull()).count() == 0, "Nulls in 'reve
 
 # COMMAND ----------
 
-# TODO
-distinctDF = purchasesDF.FILL_IN
+# distinctDF = purchasesDF.select("event_name").distinct()
+# display(distinctDF)
+distinctDF = purchaseDF.dropDuplicates(['event_name'])
 display(distinctDF)
 
 # COMMAND ----------
@@ -366,7 +372,7 @@ display(distinctDF)
 # COMMAND ----------
 
 # TODO
-finalDF = purchasesDF.FILL_IN
+finalDF = purchasesDF.drop("event_name")
 display(finalDF)
 
 # COMMAND ----------
@@ -388,7 +394,8 @@ assert(set(finalDF.columns) == expected_columns)
 
 # TODO
 finalDF = (eventsDF
-  .FILL_IN
+  .withColumn("revenue",col("ecommerce.purchase_revenue_in_usd"))
+  .filter(col("revenue").isNotNull())
 )
 
 display(finalDF)
