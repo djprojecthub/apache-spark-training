@@ -97,6 +97,13 @@ display(cityPurchaseQuantitiesDF)
 
 # COMMAND ----------
 
+#modified Cmd15
+cityPurchaseQuantitiesDF = df.groupBy("geo.state", "geo.city").agg(sum("ecommerce.total_item_quantity").alias("total items")
+                                                                   , sum("ecommerce.purchase_revenue_in_usd").alias("total revenue"))
+display(cityPurchaseQuantitiesDF)
+
+# COMMAND ----------
+
 # MAGIC %md ## Built-In Functions
 # MAGIC In addition to DataFrame and Column transformation methods, there are a ton of helpful functions in Spark's built-in <a href="https://docs.databricks.com/spark/latest/spark-sql/language-manual/sql-ref-functions-builtin.html" target="_blank">SQL functions</a> module.
 # MAGIC
@@ -216,7 +223,11 @@ display(df)
 
 # TODO
 
-trafficDF = (df.FILL_IN
+trafficDF = (df.groupBy("traffic_source")
+             .agg(
+                 sum("revenue").alias("total_rev"),
+                  avg("revenue").alias("avg_rev")
+                  )
 )
 
 display(trafficDF)
@@ -244,7 +255,7 @@ assert(expected1 == result1)
 # COMMAND ----------
 
 # TODO
-topTrafficDF = (trafficDF.FILL_IN
+topTrafficDF = (trafficDF.orderBy(col("total_rev").desc()).limit(3)
 )
 display(topTrafficDF)
 
@@ -270,7 +281,9 @@ assert(expected2 == result2)
 # COMMAND ----------
 
 # TODO
-finalDF = (topTrafficDF.FILL_IN
+finalDF = (topTrafficDF
+           .withColumn("avg_rev", (col("avg_rev") * 100).cast("long") / 100)
+           .withColumn("total_rev", (col("total_rev") * 100).cast("long") /100)
 )
 
 display(finalDF)
@@ -295,7 +308,9 @@ assert(expected3 == result3)
 # COMMAND ----------
 
 # TODO
-bonusDF = (topTrafficDF.FILL_IN
+bonusDF = (topTrafficDF
+           .withColumn("total_rev", round("total_rev",2))
+           .withColumn("avg_rev", round("avg_rev",2))
 )
 
 display(bonusDF)

@@ -188,7 +188,7 @@ display(mobileDF)
 # COMMAND ----------
 
 purchaseQuantityDF = eventsDF.withColumn("purchase_quantity", col("ecommerce.total_item_quantity").cast("int"))
-purchaseQuantityDF.printSchema()
+display(purchaseQuantityDF)
 
 # COMMAND ----------
 
