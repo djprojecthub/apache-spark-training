@@ -333,7 +333,14 @@ assert(expected4 == result4)
 # COMMAND ----------
 
 # TODO
-chainDF = (df.FILL_IN
+chainDF = (df.groupBy("traffic_source")
+           .agg(
+               sum("revenue").alias("total_rev"),
+               avg("revenue").alias("avg_rev")
+           )
+           .orderBy(col("total_rev").desc()).limit(3)
+           .withColumn("total_rev", round("total_rev",2))
+           .withColumn("avg_rev", round("avg_rev",2))
 )
 
 display(chainDF)
