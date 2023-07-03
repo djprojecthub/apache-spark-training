@@ -100,11 +100,9 @@ display(df)
 
 from pyspark.sql.functions import *
 
-detailsDF = (df
-             .withColumn("items", explode("items"))
-             .select("email", "items.item_name")
-             .withColumn("details", split(col("item_name"), " "))
-            )
+detailsDF = df.withColumn("items", explode("items"))    \
+                .select("email", "items.item_name")     \
+                      .withColumn("details", split("item_name"," "))
 display(detailsDF)
 
 # COMMAND ----------
@@ -123,11 +121,11 @@ display(detailsDF)
 
 # COMMAND ----------
 
-mattressDF = (detailsDF
-              .filter(array_contains(col("details"), "Mattress"))
-              .withColumn("size", element_at(col("details"), 2))
-              .withColumn("quality", element_at(col("details"), 1))
-             )
+mattressDF = (
+    detailsDF.filter(array_contains("details","Mattress"))
+    .withColumn("Size",element_at("details",2))
+    .withColumn("Quality",element_at("details",1))
+)
 display(mattressDF)
 
 # COMMAND ----------
@@ -147,11 +145,11 @@ display(mattressDF)
 
 # COMMAND ----------
 
-pillowDF = (detailsDF
-            .filter(array_contains(col("details"), "Pillow"))
-            .withColumn("size", element_at(col("details"), 1))
-            .withColumn("quality", element_at(col("details"), 2))
-           )
+pillowDF = (
+    detailsDF.filter(array_contains("details","Pillow"))
+    .withColumn("Size",element_at("details",1))
+    .withColumn("Quality",element_at("details",2))
+)
 display(pillowDF)
 
 # COMMAND ----------
@@ -183,11 +181,13 @@ display(unionDF)
 
 # COMMAND ----------
 
-optionsDF = (unionDF
-             .groupBy("email")
-             .agg(collect_set("size").alias("size options"),
-                  collect_set("quality").alias("quality options"))
-            )
+optionDF = (
+    unionDF.groupBy("email")
+    .agg(
+        collect_set("size").alias("size options"),
+        collect_set("quality").alias("quality options")
+    )
+)
 display(optionsDF)
 
 # COMMAND ----------
