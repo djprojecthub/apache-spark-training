@@ -68,7 +68,7 @@ usersDF.printSchema()
 
 usersDF = (spark
            .read
-           .csv(usersCsvPath, sep="\t", header=True, inferSchema=True)
+           .csv(usersCsvPath, header=True, sep="\t", inferSchema=True)
           )
 
 usersDF.printSchema()

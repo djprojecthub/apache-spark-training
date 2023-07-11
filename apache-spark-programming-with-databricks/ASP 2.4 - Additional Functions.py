@@ -237,7 +237,7 @@ assert cartsDF.select(col("user_id")).drop_duplicates().count() == expectedCount
 # COMMAND ----------
 
 # TODO
-emailCartsDF = conversionsDF.join(cartsDF, "user_id", "left")
+emailCartsDF = conversionsDF.join(cartsDF, "user_id", "left_outer")
 display(emailCartsDF)
 
 # COMMAND ----------
@@ -304,7 +304,11 @@ assert abandonedCartsDF.count() == expectedCount, "Counts do not match"
 # COMMAND ----------
 
 # TODO
-abandonedItemsDF = (abandonedCartsDF.
+abandonedItemsDF = (abandonedCartsDF
+                    .withColumn("items",explode(col("cart")))
+                    .groupBy("items")
+                    .count()
+                    .sort(col("count").desc())
 )
 display(abandonedItemsDF)
 
