@@ -112,8 +112,8 @@ display(salesDF.select(firstLetterUDF(col("email"))))
 # COMMAND ----------
 
 # Our input/output is a string
-@udf("string")
-def firstLetterUDF(email: str) -> str:
+@udf('string')
+def firstLetterFunction(email: str) -> str:
     return email[0]
 
 # COMMAND ----------
@@ -125,7 +125,7 @@ def firstLetterUDF(email: str) -> str:
 from pyspark.sql.functions import col
 
 salesDF = spark.read.parquet("/mnt/training/ecommerce/sales/sales.parquet")
-display(salesDF.select(firstLetterUDF(col("email"))))
+display(salesDF.select(firstLetterFunction(col("email"))))
 
 # COMMAND ----------
 
@@ -226,7 +226,8 @@ def labelDayOfWeek(day: str) -> str:
 # COMMAND ----------
 
 # TODO
-labelDowUDF = FILL_IN
+labelDowUDF = udf(labelDayOfWeek)
+print(type(labelDowUDF))
 
 # COMMAND ----------
 
@@ -238,7 +239,7 @@ labelDowUDF = FILL_IN
 # COMMAND ----------
 
 # TODO
-finalDF = FILL_IN
+finalDF = df.withColumn("day",labelDowUDF(col("day"))).orderBy("day")
 
 display(finalDF)
 

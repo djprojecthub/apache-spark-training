@@ -24,9 +24,13 @@ df.show()
 
 # COMMAND ----------
 
+display(df.rdd.getNumPartitions())
+
+# COMMAND ----------
+
 from pyspark.sql.functions import col
 
-output1 = df.select("Name","Age").where("age<30").orderBy(col("Name").desc())
+output1 = df.select("Name","Age").where("age < 30").orderBy(col("age").desc())
 output1.show()
 
 # COMMAND ----------
