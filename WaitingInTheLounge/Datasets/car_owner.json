@@ -1,0 +1,48 @@
+{
+  "car_owners": [
+    {
+      "name": "John",
+      "age": 30,
+      "cars": {
+        "car1": {
+          "name": "Ford",
+          "models": [
+            "Fiesta",
+            "Focus",
+            "Mustang"
+          ]
+        },
+        "car2": {
+          "name": "BMW",
+          "models": [
+            "320",
+            "X3",
+            "X5"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Max",
+      "age": 35,
+      "cars": {
+        "car1": {
+          "name": "Tata",
+          "models": [
+            "Harrier",
+            "Hexa",
+            "Safari"
+          ]
+        },
+        "car2": {
+          "name": "BMW",
+          "models": [
+            "320",
+            "X3",
+            "X5"
+          ]
+        }
+      }
+    }
+  ]
+}
