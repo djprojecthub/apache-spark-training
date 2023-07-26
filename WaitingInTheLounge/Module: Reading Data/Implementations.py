@@ -27,7 +27,7 @@ orderDetails_df = (
               .option("inferSchema","true")
               .load(jsonfilepath)
 )
-display(orderDetails_df)
+display(orderDetails_df.select("cars.car1"))
 
 # COMMAND ----------
 
@@ -137,8 +137,41 @@ userdatapartitionedparquetDF.show()
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### 5. Reading data from a web API into a PySpark Dataframe
+# MAGIC ### 5. Reading data from a web API into a PySpark Dataframe (the right way)
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ##### Below code uses json.dumps() for api response body. <br/> Refer https://www.geeksforgeeks.org/json-dumps-in-python/ link for understanding how it works.
 
+# COMMAND ----------
+
+import requests
+from pyspark.sql.functions import udf
+from pyspark.sql.types import StringType
+
+def rest_api_call(url):
+    res = None
+    try:
+        res = requests.get(url)
+    except Exception as e:
+        print(e)
+    if res != None and res.status_code == 200:
+        return res.text
+
+rest_api_udf = udf(rest_api_call, StringType())
+
+df = spark.createDataFrame([(1, "https://jsonplaceholder.typicode.com/todos/1")], ["id", "url"])
+
+result = df.withColumn("response", rest_api_udf(df.url))
+display(result)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### 6. Reading data from a Kafka stream into a PySpark Dataframe
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### 7. Reading data from file stream using structured streaming into a PySpark dataframe
