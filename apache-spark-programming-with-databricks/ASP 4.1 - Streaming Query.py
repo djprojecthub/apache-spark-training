@@ -139,7 +139,10 @@ schema = "order_id BIGINT, email STRING, transaction_timestamp BIGINT, total_ite
 # COMMAND ----------
 
 # TODO
-df = (spark.FILL_IN
+df = (spark.readStream
+      .schema(schema)
+      .option("maxfilespertrigger",1)
+      .parquet(salesPath)
 )
 
 # COMMAND ----------
@@ -162,7 +165,9 @@ assert df.columns == ["order_id", "email", "transaction_timestamp", "total_item_
 # COMMAND ----------
 
 # TODO
-couponSalesDF = (df.FILL_IN
+from pyspark.sql.functions import explode
+couponSalesDF = (df.withColumn("items", explode(col("items")))
+                 .filter(col("items.coupon").isNotNull())
 )
 
 # COMMAND ----------
@@ -191,7 +196,13 @@ assert "StructField(items,StructType(List(StructField(coupon" in schemaStr, "ite
 couponsCheckpointPath = workingDir + "/coupon-sales/checkpoint"
 couponsOutputPath = workingDir + "/coupon-sales/output"
 
-couponSalesQuery = (couponSalesDF.FILL_IN
+couponSalesQuery = (couponSalesDF.writeStream
+                    .outputMode("append")
+                    .queryName("coupon_sales")
+                    .format("parquet")
+                    .trigger(processingTime="1 second")
+                    .option("checkpointLocation", couponsCheckpointPath)
+                    .start(couponsOutputPath)
 )
 
 # COMMAND ----------
@@ -215,12 +226,14 @@ assert "coupon_sales" in couponSalesQuery.lastProgress["name"]
 # COMMAND ----------
 
 # TODO
-queryID = couponSalesQuery.FILL_IN
+queryID = couponSalesQuery.id
+queryID
 
 # COMMAND ----------
 
 # TODO
-queryStatus = couponSalesQuery.FILL_IN
+queryStatus = couponSalesQuery.status
+queryStatus
 
 # COMMAND ----------
 
@@ -239,7 +252,7 @@ assert list(queryStatus.keys()) == ["message", "isDataAvailable", "isTriggerActi
 # COMMAND ----------
 
 # TODO
-couponSalesQuery.FILL_IN
+couponSalesQuery.stop()
 
 # COMMAND ----------
 
@@ -256,6 +269,8 @@ assert not couponSalesQuery.isActive
 # COMMAND ----------
 
 # TODO
+df = spark.read.format("parquet").load(couponsOutputPath)
+df.show()
 
 # COMMAND ----------
 

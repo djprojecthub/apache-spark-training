@@ -175,3 +175,85 @@ display(result)
 
 # MAGIC %md
 # MAGIC ### 7. Reading data from file stream using structured streaming into a PySpark dataframe
+
+# COMMAND ----------
+
+from pyspark.sql.types import StructType, StructField, TimestampType, StringType
+from pyspark.sql.functions import col
+
+inputPath = "dbfs:/FileStore/tables/streaming_data"
+
+schema = StructType(
+    [
+        StructField("time", TimestampType(),True),
+        StructField("customer", StringType(), True),
+        StructField("action", StringType(), True),
+        StructField("device", StringType(), True)
+     ]
+)
+
+inputDF = (
+    spark
+    .read
+    .schema(schema)
+    .json(inputPath)
+)
+display(inputDF)
+
+# COMMAND ----------
+
+# Cleanup data: Remove empty rows
+inputDF = inputDF.dropna()
+display(inputDF)
+
+# COMMAND ----------
+
+# Aggregate number of actions 
+actionDF = (
+    inputDF
+    .groupBy("action")
+    .count()
+)
+actionDF.show()
+
+# COMMAND ----------
+
+streamingDF = (
+    spark
+    .readStream
+    .schema(schema)
+    .option("maxfilespertrigger",1) # one file at a time will be streamed from streaming location
+    .json(inputPath)
+)
+
+# Stream `streamingDF` while aggregating by action
+streamingActionsCountDF = (
+    streamingDF
+    .groupBy("action")
+    .count()
+)
+
+# COMMAND ----------
+
+# Is `streamingActionCountsDF` actually streaming?
+streamingActionsCountDF.isStreaming
+
+# COMMAND ----------
+
+spark.conf.set("spark.sql.shuffle.partitions",2)
+streamOutputPath = "dbfs:/FileStore/tables/streaming_data/stream_output"
+checkpointPath = "dbfs:/FileStore/tables/streaming_data/checkpointPath"
+#View stream in real time
+query = (
+    streamingActionsCountDF
+    .writeStream
+    .outputMode("complete")
+    .queryName("counts")
+    .option("checkpointLocation",checkpointPath)
+    .start(streamOutputPath)
+)
+
+# COMMAND ----------
+
+# stop streaming
+query.stop()
