@@ -326,9 +326,10 @@ eventsDF.printSchema()
 # COMMAND ----------
 
 # TODO
-macDF = (eventsDF
-         .where("device = 'macOS'")
-         .orderBy("event_timestamp")
+macDF = (
+    eventsDF
+    .filter("device='macOS'")
+    .orderBy("event_timestamp")
 )
 display(macDF)
 

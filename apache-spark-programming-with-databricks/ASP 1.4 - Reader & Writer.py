@@ -364,12 +364,15 @@ assert(productsDF.count() == 12)
 
 # COMMAND ----------
 
-# from pyspark.sql.Types import StructType,StructField,StringType, DoubleType
-userDefinedSchema = StructType([
-  StructField("item_id", StringType(), True),
-  StructField("name", StringType(), True),
-  StructField("price", DoubleType(), True)
-])
+from pyspark.sql.types import StructType,StructField,StringType, DoubleType
+
+userDefinedSchema = (
+    StructType(
+        [StructField("item_id", StringType(),True),
+         StructField("name", StringType(),True),
+         StructField("price", DoubleType(), True)]
+        )
+    )
 
 productsDF2 = spark.read  \
                    .csv(productsCsvPath, header=True, schema=userDefinedSchema)

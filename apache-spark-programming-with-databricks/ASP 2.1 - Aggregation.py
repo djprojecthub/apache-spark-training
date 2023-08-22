@@ -98,8 +98,10 @@ display(cityPurchaseQuantitiesDF)
 # COMMAND ----------
 
 #modified Cmd15
-cityPurchaseQuantitiesDF = df.groupBy("geo.state", "geo.city").agg(sum("ecommerce.total_item_quantity").alias("total items")
+cityPurchaseQuantitiesDF = (
+    df.groupBy("geo.state", "geo.city").agg(sum("ecommerce.total_item_quantity").alias("total items")
                                                                    , sum("ecommerce.purchase_revenue_in_usd").alias("total revenue"))
+)
 display(cityPurchaseQuantitiesDF)
 
 # COMMAND ----------
@@ -277,6 +279,13 @@ assert(expected2 == result2)
 # MAGIC - Modify columns **`avg_rev`** and **`total_rev`** to contain numbers with two decimal places
 # MAGIC   - Use **`withColumn()`** with the same names to replace these columns
 # MAGIC   - To limit to two decimal places, multiply each column by 100, cast to long, and then divide by 100
+
+# COMMAND ----------
+
+display(topTrafficDF
+        .withColumn("avg_rev", round("avg_rev",2))
+        .withColumn("total_rev", round("total_rev",2))
+        )
 
 # COMMAND ----------
 

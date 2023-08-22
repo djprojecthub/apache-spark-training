@@ -360,7 +360,7 @@ assert purchasesDF.filter(col("revenue").isNull()).count() == 0, "Nulls in 'reve
 
 # distinctDF = purchasesDF.select("event_name").distinct()
 # display(distinctDF)
-distinctDF = purchaseDF.dropDuplicates(['event_name'])
+distinctDF = purchasesDF.dropDuplicates(['event_name'])
 display(distinctDF)
 
 # COMMAND ----------

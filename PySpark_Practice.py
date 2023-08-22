@@ -92,6 +92,15 @@ dj1.join(dj2,"col1").count()
 # COMMAND ----------
 
 # MAGIC %md
+# MAGIC ### self-join in pyspark 
+
+# COMMAND ----------
+
+# find manager of an employee and highest rank employee
+
+# COMMAND ----------
+
+# MAGIC %md
 # MAGIC ### window functions in pyspark
 
 # COMMAND ----------

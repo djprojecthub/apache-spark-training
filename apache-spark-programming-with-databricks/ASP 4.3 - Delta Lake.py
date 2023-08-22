@@ -149,6 +149,10 @@ display(df)
 
 # COMMAND ----------
 
+display(stateEventsDF)
+
+# COMMAND ----------
+
 df_update = stateEventsDF.filter(col("device").isin(["Android", "iOS"]))
 display(df_update)
 
@@ -205,7 +209,7 @@ display(df)
 # COMMAND ----------
 
 # TODO
-timeStampString = <FILL_IN>
+timeStampString = "2023-08-21T09:44:10.000+0000"
 df = spark.read.format("delta").option("timestampAsOf", timeStampString).load(deltaPath)
 display(df)
 
@@ -278,7 +282,7 @@ deltaSalesPath = workingDir + "/delta-sales"
 # COMMAND ----------
 
 # TODO
-salesDF.FILL_IN
+salesDF.write.format("delta").mode("overwrite").save(deltaSalesPath)
 
 # COMMAND ----------
 
@@ -297,7 +301,8 @@ assert len(dbutils.fs.ls(deltaSalesPath)) > 0
 # COMMAND ----------
 
 # TODO
-updatedSalesDF = FILL_IN
+from pyspark.sql.functions import size
+updatedSalesDF = salesDF.withColumn("items", size(col("items")))
 display(updatedSalesDF)
 
 # COMMAND ----------
@@ -320,7 +325,7 @@ assert updatedSalesDF.schema[6].dataType == IntegerType()
 # COMMAND ----------
 
 # TODO
-updatedSalesDF.FILL_IN
+updatedSalesDF.write.format("delta").mode("overwrite").option("overwriteSchema",True).save(deltaSalesPath)
 
 # COMMAND ----------
 
@@ -341,10 +346,13 @@ assert spark.read.format("delta").load(deltaSalesPath).schema[6].dataType == Int
 # COMMAND ----------
 
 # TODO
+spark.sql("DROP TABLE IF EXISTS sales_delta")
+spark.sql("CREATE TABLE sales_delta USING DELTA LOCATION '{}'".format(deltaSalesPath))
 
 # COMMAND ----------
 
 # TODO
+display(spark.sql("DESCRIBE HISTORY sales_delta"))
 
 # COMMAND ----------
 
@@ -365,7 +373,7 @@ assert salesDeltaDF.schema[6].dataType == IntegerType()
 # COMMAND ----------
 
 # TODO
-oldSalesDF = FILL_IN
+oldSalesDF = spark.read.format("delta").option("versionAsOf",0).load(deltaSalesPath)
 display(oldSalesDF)
 
 # COMMAND ----------

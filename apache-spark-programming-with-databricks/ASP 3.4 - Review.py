@@ -69,7 +69,33 @@ destFile = workingDir + "/people.parquet"
 dbutils.fs.rm(destFile, True)
 
 # Complete your work here...
+from pyspark.sql.types import *
+from pyspark.sql.functions import col,upper,regexp_replace
 
+schema = StructType(
+    [
+        StructField("firstName",StringType(),True),
+        StructField("middleName",StringType(),True),
+        StructField("lastName",StringType(),True),
+        StructField("gender",StringType(),True),
+        StructField("birthDate",StringType(),True),
+        StructField("salary",StringType(),True),
+        StructField("ssn",StringType(),True)
+    ]
+)
+
+df = spark \
+    .read \
+    .csv(sourceFile, schema=schema, sep=":", header=True)
+
+df = df.withColumn("firstName", upper(col("firstName"))) \
+        .withColumn("middleName", upper(col("middleName"))) \
+            .withColumn("lastName", upper(col("lastName"))) \
+                .withColumn("ssn", regexp_replace(col("ssn"), "-", ""))
+
+df = df.distinct()
+
+df.write.format("delta").save(destFile)
 
 # COMMAND ----------
 
@@ -77,7 +103,7 @@ dbutils.fs.rm(destFile, True)
 
 # COMMAND ----------
 
-verify_files = dbutils.fs.ls(deltaDestDir)
+verify_files = dbutils.fs.ls(destFile)
 verify_delta_format = False
 verify_num_data_files = 0
 for f in verify_files:
@@ -89,7 +115,7 @@ for f in verify_files:
 assert verify_delta_format, "Data not written in Delta format"
 assert verify_num_data_files == 1, "Expected 1 data file written"
 
-verify_record_count = spark.read.format("delta").load(deltaDestDir).count()
+verify_record_count = spark.read.format("delta").load(destFile).count()
 assert verify_record_count == 100000, "Expected 100000 records in final result"
 
 del verify_files, verify_delta_format, verify_num_data_files, verify_record_count

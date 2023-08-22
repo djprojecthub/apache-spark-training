@@ -129,11 +129,12 @@ display(formattedDF)
 from pyspark.sql.functions import year, month, dayofweek, minute, second
 
 datetimeDF = (timestampDF
-              .withColumn("year", year(col("timestamp")))
+              .withColumn("year", year("timestamp"))
               .withColumn("month", month(col("timestamp")))
               .withColumn("dayofweek", dayofweek(col("timestamp")))
               .withColumn("minute", minute(col("timestamp")))
               .withColumn("second", second(col("timestamp")))
+              .withColumn("weekend", col("dayofweek").isin(1,7)) # *added by DJ
              )
 display(datetimeDF)
 
